@@ -1,0 +1,259 @@
+@baseUrl = http://localhost:8000/api/v1
+
+# ======================================================================================================================================
+# 1. AUTENTICACIÓN Y FLUJO DE USUARIO CLIENTE
+# ======================================================================================================================================
+
+### 1.1 Registrar un nuevo cliente (201 Created - o 409 si ya existe)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "cliente1",
+    "full_name": "Juan Perez",
+    "email": "cliente1@example.com",
+    "password": "Password123!"
+}
+
+### 1.2 Login como Cliente (Guarda la cookie HttpOnly automáticamente)
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=cliente1&password=Password123!
+
+### 1.3 Consultar perfil actual (/me)
+GET {{baseUrl}}/auth/me
+
+### 1.4 Logout (Elimina la cookie activa)
+POST {{baseUrl}}/auth/logout
+
+
+# ========================================================================================================================================
+# 2. LOGIN COMO ADMINISTRADOR (SEED)
+# ========================================================================================================================================
+
+### 2.1 Login como Admin (Ejecutar antes de probar endpoints de administración)
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 2.2 Verificar sesión de Admin
+GET {{baseUrl}}/auth/me
+
+
+# ==========================================================================================================================================
+# 3. CATEGORÍAS Público y Admin
+# ==========================================================================================================================================
+
+### 3.1 Listar categorías activas Público
+GET {{baseUrl}}/categorias
+
+### 3.2 Obtener detalle de categoría por ID Público
+GET {{baseUrl}}/categorias/1
+
+### 3.3 Crear nueva categoría (Solo Admin - 201 Created)
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+    "nombre": "Postres",
+    "descripcion": "Postres caseros y helados"
+}
+
+### 3.4 Intentar crear categoría duplicada (Prueba 409 Conflict)
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+    "nombre": "Hamburguesas",
+    "descripcion": "Duplicada"
+}
+
+### 3.5 Actualizar categoría (Solo Admin - 200 OK)
+PUT {{baseUrl}}/categorias/4
+Content-Type: application/json
+
+{
+    "nombre": "Postres y Dulces",
+    "descripcion": "Postres artesanales, tortas y helados"
+}
+
+### 3.6 Baja lógica de categoría (Solo Admin - 204 No Content)
+DELETE {{baseUrl}}/categorias/4
+
+
+# =====================================================================================================================================
+# 4. PRODUCTOS Catálogo Público y Gestión Admin
+# =====================================================================================================================================
+
+### 4.1 Listar productos paginados (Público)
+GET {{baseUrl}}/productos?skip=0&limit=10
+
+### 4.2 Filtrar productos por búsqueda, categoría y disponibilidad (Público)
+GET {{baseUrl}}/productos?search=Hamburguesa&categoria_id=1&disponible=true
+
+### 4.3 Obtener detalle de un producto (Público)
+GET {{baseUrl}}/productos/1
+
+### 4.4 Crear nuevo producto (Solo Admin - 201 Created)
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+    "categoria_id": 1,
+    "nombre": "Hamburguesa Crispy",
+    "descripcion": "Medallón de pollo crispy, lechuga y mayonesa de ajo",
+    "precio_base": 5200.0,
+    "imagen_url": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd",
+    "stock": 12,
+    "disponible": true
+}
+
+### 4.5 Actualizar datos de un producto (Solo Admin - 200 OK)
+PUT {{baseUrl}}/productos/7
+Content-Type: application/json
+
+{
+    "nombre": "Hamburguesa Pollo Crispy",
+    "precio_base": 5400.0
+}
+
+### 4.6 Actualizar stock y disponibilidad (Solo Admin - 200 OK)
+PATCH {{baseUrl}}/productos/7/stock
+Content-Type: application/json
+
+{
+    "stock": 25,
+    "disponible": true
+}
+
+### 4.7 Baja lógica de producto (Solo Admin - 204 No Content)
+DELETE {{baseUrl}}/productos/7
+
+
+# =====================================================================================================================================
+# 5. PEDIDOS Y REGLAS DE NEGOCIO
+# =====================================================================================================================================
+
+### 5.1 Cambiar a sesión de Cliente para crear pedidos
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=cliente1&password=Password123!
+
+### 5.2 Crear Pedido válido Descuenta stock y congela precios (201 Created)
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 2
+        },
+        {
+            "producto_id": 5,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "EFECTIVO",
+    "direccion_entrega": "Av. Lavalle 450, Zárate",
+    "notas": "Tocar timbre B"
+}
+
+### 5.3 Rechazar pedido por stock insuficiente (400 Bad Request)
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 1,
+            "cantidad": 999
+        }
+    ],
+    "forma_pago": "TRANSFERENCIA",
+    "direccion_entrega": "Av. Mitre 1200",
+    "notas": "Prueba exceso de stock"
+}
+
+### 5.4 Listar mis pedidos que como cliente solo veo los mios
+GET {{baseUrl}}/pedidos?skip=0&limit=10
+
+### 5.5 Ver detalle de un pedido propio
+GET {{baseUrl}}/pedidos/1
+
+### 5.6 Cancelar pedido como cliente en estado PENDIENTE
+PATCH {{baseUrl}}/pedidos/1/cancelar
+
+### 5.7 Crear un segundo pedido para probar el flujo del Administrador
+POST {{baseUrl}}/pedidos
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "producto_id": 3,
+            "cantidad": 1
+        }
+    ],
+    "forma_pago": "TRANSFERENCIA",
+    "direccion_entrega": "Justa Lima 850",
+    "notas": "Sin aceitunas"
+}
+
+
+# =================================================================================================================================
+# 6. GESTIÓN DE PEDIDOS Y MÉTRICAS (Solo Admin)
+# =================================================================================================================================
+
+### 6.1 Volver a iniciar sesión como Admin
+POST {{baseUrl}}/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=admin&password=Admin1234!
+
+### 6.2 Pasar pedido #2 a EN_PREPARACION
+PATCH {{baseUrl}}/pedidos/2/estado
+Content-Type: application/json
+
+{
+    "estado": "EN_PREPARACION"
+}
+
+### 6.3 Pasar pedido #2 a ENTREGADO
+PATCH {{baseUrl}}/pedidos/2/estado
+Content-Type: application/json
+
+{
+    "estado": "ENTREGADO"
+}
+
+### 6.4 Intentar cancelar un pedido ya ENTREGADO (400 Bad Request)
+PATCH {{baseUrl}}/pedidos/2/estado
+Content-Type: application/json
+
+{
+    "estado": "CANCELADO"
+}
+
+### 6.5 Consultar resumen de métricas e ingresos (Solo Admin)
+GET {{baseUrl}}/pedidos/resumen
+
+
+# =============================================================================================================================
+# 7. GESTIÓN DE USUARIOS (Solo Admin)
+# =============================================================================================================================
+
+### 7.1 Listar todos los usuarios registrados
+GET {{baseUrl}}/admin/usuarios
+
+### 7.2 Desactivar cuenta del cliente (ID 2)
+POST {{baseUrl}}/admin/usuarios/2/desactivar
+
+### 7.3 Reactivar cuenta del cliente (ID 2)
+POST {{baseUrl}}/admin/usuarios/2/activar
+
+### 7.4 Intentar desactivar al propio admin logueado (Prueba 400 Bad Request)
+POST {{baseUrl}}/admin/usuarios/1/desactivar

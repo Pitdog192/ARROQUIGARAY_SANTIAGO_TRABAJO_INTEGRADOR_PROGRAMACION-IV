@@ -47,19 +47,13 @@ Abrir una terminal y dirigirse a la carpeta backend/ con cd backend
 #### B. Instalar las dependencias fijadas
 pip install -r requirements.txt
 
-#### C. Inicializar la Base de Datos y ejecutar el Script Semilla (Seed)
-Este comando va a crear todas las tablas en PostgreSQL y poblará la base de datos de forma idempotente con categorías, productos con stock y el usuario administrador:
-
-```
-python -m app.db.seed
-```
-
-#### D. Iniciar el servidor de desarrollo del Backend
+#### C. Iniciar el servidor de desarrollo del Backend
 
 ```
 uvicorn app.main:app --reload
 ```
 
+* Batería de pruebas en archivo `test.http` (usar con la extensión REST Client, en caso de usar VS)
 * El servidor estará disponible en: http://localhost:127.0.0.1:8000
 * Documentación interactiva (Swagger UI): http://localhost:127.0.0.1:8000/docs
 * Documentación interactiva (ReDoc): http://localhost:127.0.0.1:8000/redoc

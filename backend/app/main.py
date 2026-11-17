@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import create_all_tables
+from app.db.seed import seed_database
 
 # Routers
 from app.modules.auth.router import router as auth_router
@@ -15,6 +16,7 @@ from app.modules.pedidos.router import router as pedidos_router
 async def lifespan(app: FastAPI):
     # Código de inicio (startup)
     create_all_tables()
+    seed_database()
     yield
     # Aquí iría el código de cierre (shutdown) si fuera necesario
 
