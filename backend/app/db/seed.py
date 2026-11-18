@@ -48,6 +48,8 @@ def seed_database():
             ("Pizza Especial", "Muzzarella, jamón, morrones y aceitunas", 9500.0, 8, categorias_data[1][0]),
             ("Coca Cola 1.5L", "Gaseosa línea Coca Cola retornable", 2200.0, 30, categorias_data[2][0]),
             ("Cerveza Heineken 1L", "Cerveza rubia tirada/retornable", 3000.0, 25, categorias_data[2][0]),
+            ("Cerveza Brama 1L", "Cerveza rubia tirada", 3500.0, 25, categorias_data[2][0]),
+            ("Cerveza Quilmes 1L", "Cerveza Negra", 1500.0, 25, categorias_data[2][0]),
         ]
 
         for nombre, desc, precio, stock, cat_nombre in productos_data:

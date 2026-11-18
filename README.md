@@ -1,84 +1,105 @@
-# Trabajo Práctico Integrador - Food Store (Programación IV)
+# Food Store — Sistema de Pedidos de Comida (TPI Programación IV)
+
+Aplicación web fullstack para un negocio de comidas, construida con un backend en FastAPI + SQLModel sobre PostgreSQL y un frontend en React + TypeScript + Vite estilado con Tailwind CSS. Implementa arquitectura en capas con patrón Unit of Work, autenticación mediante JWT en cookie HttpOnly, autorización por roles, manejo de estado del servidor con TanStack Query, formularios con TanStack Form, tablas con TanStack Table y estado del cliente persistido con Zustand.
+
+## 
+- **Alumno:** Santiago Arroquigaray
+
+## Enlaces de Entrega
+- **Repositorio Público de GitHub:** Todavia no grabe nada
+- **Video de Demostración (10 a 15 min):** https://github.com/Pitdog192/ARROQUIGARAY_SANTIAGO_TRABAJO_INTEGRADOR_PROGRAMACION-IV
+
 ## Requisitos Previos
+- **Python:** 3.11 a 3.13
+- **PostgreSQL:** 15 o superior (para desarrollo local también se acepta SQLite modificando DATABASE_URL)
+- **Node.js:** 20.19 o superior
+- **Gestor de paquetes frontend:** pnpm 9+ o npm
 
-* Python (versión recomendada entre 3.11 y 3.13)
-* Node.js (versión 18.x o superior) y npm
-* PostgreSQL (versión 15 o superior en ejecución local)
-* Git
+## Variables de Entorno
 
+### 1. Backend (archivo `backend/.env` creado a partir de `backend/.env.example`)
+- `DATABASE_URL=postgresql+psycopg://usuario:contraseña@localhost:5432/foodstore_db`
+- `SECRET_KEY=cambiar-esta-clave-secreta-de-al-menos-32-caracteres-123456`
+- `ALGORITHM=HS256`
+- `ACCESS_TOKEN_EXPIRE_MINUTES=30`
+- `FRONTEND_ORIGIN=http://localhost:5173`
 
-## Variables de Entorno (.env)
+### 2. Frontend (archivo `frontend/.env` creado a partir de `frontend/.env.example`)
+- `VITE_API_URL=http://localhost:8000/api/v1`
 
-Crear un archivo llamado .env dentro de la carpeta backend/ completando las variables de configuración correspondientes (DATABASE_URL, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES y FRONTEND_ORIGIN).
+## Instalación y Ejecución del Backend
 
-```env
-DATABASE_URL=postgresql+psycopg://<usuario>:<contraseña>@localhost:5432/foodstore_db
-SECRET_KEY=clave-secreta-super-segura-y-extensa-para-jwt-min-32-caracteres
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-FRONTEND_ORIGIN=http://localhost:5173
-```
+1. Abrir una terminal y ubicarse en el directorio del servidor:
+    ```cd backend```
 
-## Instalación y Ejecución
-### 1. Clonar el repositorio y posicionarse en la raíz
-
-```
-git clone https://github.com/Pitdog192/ARROQUIGARAY_SANTIAGO_TRABAJO_INTEGRADOR_PROGRAMACION-IV.git
-cd ARROQUIGARAY_SANTIAGO_TRABAJO_INTEGRADOR_PROGRAMACION-IV
-```
-
-
-### 2. Configuración y Ejecución del Backend
-
-Abrir una terminal y dirigirse a la carpeta backend/ con cd backend
-
-#### A. Crear y activar el entorno virtual
-* En Windows (Git Bash / PowerShell):
-    ```bash
-        python -m venv venv
-        source venv/Scripts/activate
+2. Crear y activar el entorno virtual:
     ```
-* En Linux / macOS:
-    ```
-        python3 -m venv venv
-        source venv/bin/activate
+    python -m venv venv
+    source venv/Scripts/activate
+    source venv/bin/activate    
     ```
 
-#### B. Instalar las dependencias fijadas
-pip install -r requirements.txt
+3. Instalar las dependencias con versiones fijadas:
+    ```pip install -r requirements.txt```
 
-#### C. Iniciar el servidor de desarrollo del Backend
+4. Crear el archivo de variables de entorno copiando la plantilla:
+    ```cp .env.example .env```
 
-```
-uvicorn app.main:app --reload
-```
+5. Ejecutar el seed inicial idempotente (también se ejecuta automaticamente al iniciar la aplicación con main.py):
+    ```python -m app.db.seed```
 
-* Batería de pruebas en archivo `test.http` (usar con la extensión REST Client, en caso de usar VS)
-* El servidor estará disponible en: http://localhost:127.0.0.1:8000
-* Documentación interactiva (Swagger UI): http://localhost:127.0.0.1:8000/docs
-* Documentación interactiva (ReDoc): http://localhost:127.0.0.1:8000/redoc
+6. Levantar el servidor de desarrollo:
+    ```uvicorn app.main:app --reload```
+
+### Documentación Interactiva de la API
+- **Prefijo base:** http://localhost:8000/api/v1
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+### Usuario Administrador Inicial (Seed)
+El script `app.db.seed` es idempotente y crea automáticamente 3 categorías, 8 productos con stock disponible y la cuenta de administración:
+- **Username:** `admin`
+- **Password:** `Admin1234!`
+- **Rol:** `admin`
 
 
-### 3. Configuración y Ejecución del Frontend
+## Instalación y Ejecución del Frontend
 
-Abrir una nueva pestaña o ventana de terminal, independiente de la del backend y dirigirse a la carpeta del front con cd frontend
+1. Abrir una nueva terminal y ubicarse en el directorio del cliente:
+    ```cd frontend```
 
-#### A. Instalar las dependencias de Node
-```
-npm install
-```
+2. Crear el archivo de variables de entorno copiando la plantilla:
+    ```cp .env.example .env```
 
-#### B. Iniciar el entorno de desarrollo del Frontend
-```
-npm run dev
-```
+3. Instalar las dependencias del proyecto:
+    ``` 
+    pnpm install
+    ```
 
-Y la aplicación frontend va a estar disponible en: http://localhost:5173
+4. Verificar la compilación y el chequeo estricto de tipos de TypeScript:
+    ```
+    pnpm build
+    ```
 
-## Usuario Administrador por Defecto del seed
+5. Iniciar el servidor de desarrollo de Vite:
+    ```
+    pnpm dev
+    ```
+    (o bien: npm run dev)
 
-El script de inicialización seed.py va a generar un usuario con privilegios de administrador para la gestión y pruebas del sistema:
+6. Abrir en el navegador:
+    http://localhost:5173
 
-* Usuario / Username: admin
-* Contraseña / Password: Admin1234!
-* Rol: admin
+
+## Arquitectura del Proyecto
+
+### Backend (`backend/app/`)
+- `core/`: Configuración con pydantic-settings (`config.py`), motor y sesión SQLModel (`database.py`), seguridad bcrypt y JWT (`security.py`), dependencias de autenticación/roles (`deps.py`), repositorio genérico (`base_repository.py`) y `UnitOfWork` base (`unit_of_work.py`).
+- `modules/`: Módulos por dominio (`auth`, `usuarios`, `categorias`, `productos`, `pedidos`) estructurados en capas (`router.py` -> `service.py` -> `unit_of_work.py` -> `repository.py` -> `models.py` / `schemas.py`). El commit transaccional se realiza exclusivamente en el método `__exit__` del Unit of Work.
+- `db/seed.py`: Carga inicial idempotente de datos.
+
+### Frontend (`frontend/src/`)
+- `shared/`: Instancia Axios con `withCredentials: true` e interceptor de errores 401/400 (`axiosInstance.ts`), traductor de errores (`handleApiError.ts`), `queryClient.ts`, componentes visuales (`ui/`, `components/`) y layout principal (`Navbar`, `MainLayout`).
+- `features/`: Organización modular por dominio (`auth`, `categorias`, `productos`, `usuarios`, `pedidos`) conteniendo sus propias subcarpetas `pages/`, `components/`, `hooks/`, `api/` y `types/`.
+- `store/`: Estado global en el cliente con Zustand y persistencia (`authStore.ts` con `partialize` y `cartStore.ts`).
+- `routes/`: Definición de rutas (`AppRouter.tsx`) y protección por sesión y rol (`ProtectedRoute.tsx`).
